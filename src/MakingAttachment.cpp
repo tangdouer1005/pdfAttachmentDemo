@@ -16,10 +16,6 @@ using namespace std;
 
 using namespace PDFHummus;
 
-// end pdfwriter library includes
-
-static const string scBasePath = "../outpdf";
-static const string scSystemFontsPath = "../fonts";
 
 int main(int argc, char *argv[])
 {

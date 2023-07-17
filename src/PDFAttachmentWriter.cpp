@@ -46,8 +46,8 @@ EStatusCode PDFAttachmentWriter::OnCatalogWrite(
     //     return eFailure;
     // }
 
-    DictionaryContext *dictionaryContext = inPDFWriterObjectContext->StartDictionary();
-    dictionaryContext->WriteKey("Names");
+    //DictionaryContext *dictionaryContext = inPDFWriterObjectContext->StartDictionary();
+    inCatalogDictionaryContext->WriteKey("Names");
     PDFAttachmentToObjectIDTypeMap::iterator it = mAttachment.begin();
     for (; it != mAttachment.end(); ++it)
     {
@@ -74,7 +74,7 @@ EStatusCode PDFAttachmentWriter::OnCatalogWrite(
         inPDFWriterObjectContext->EndDictionary(dictionaryContext_0);
     }
 
-    inPDFWriterObjectContext->EndDictionary(dictionaryContext);
+    //inPDFWriterObjectContext->EndDictionary(dictionaryContext);
     // inPDFWriterObjectContext->StartArray();
     // inPDFWriterObjectContext->WriteIndirectObjectReference(it->second);
     // inPDFWriterObjectContext->EndArray(eTokenSeparatorEndLine);
