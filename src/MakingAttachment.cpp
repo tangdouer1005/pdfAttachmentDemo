@@ -13,6 +13,7 @@ using namespace std;
 
 #include "PDFWriter/OutputBufferedStream.h"
 #include "PDFWriter/OutputFileStream.h"
+#include "PDFWriter/InputFileStream.h"
 
 using namespace PDFHummus;
 
@@ -25,7 +26,7 @@ int main(int argc, char *argv[])
     do
     {
         // status = pdfWriter.StartPDF(scBasePath + "MakingComments.pdf", ePDFVersion16);
-        status = pdfWriter.StartPDF("MakingAttachment.pdf", ePDFVersion16);
+        status = pdfWriter.ModifyPDF("26_2_2pages.pdf", ePDFVersion16, "OutputPdf.pdf");
         if (status != eSuccess)
         {
             cout << "start fail\n"
@@ -33,17 +34,28 @@ int main(int argc, char *argv[])
             break;
         }
 
-        // Create a new page
-        PDFPage *pdfPage = new PDFPage();
-        pdfPage->SetMediaBox(PDFRectangle(0, 0, 595, 842));
+        // // Create a new page
+        // PDFPage *pdfPage = new PDFPage();
+        // pdfPage->SetMediaBox(PDFRectangle(0, 0, 595, 842));
 
-        // Create a content context for the page
-        PageContentContext *pageContentContext = pdfWriter.StartPageContentContext(pdfPage);
+        // // Create a content context for the page
+        // PageContentContext *pageContentContext = pdfWriter.StartPageContentContext(pdfPage);
 
         PDFAttachmentWriter attachmentWriter(&pdfWriter);
-        Byte test_[5] = {'a', 'b', 'c', 'd', 'e'};
 
-        PDFAttachment *aAttachment = new PDFAttachment(test_, 5);
+        InputFileStream tmFileStream;
+
+		status = tmFileStream.Open("29.tm");
+		if(status != PDFHummus::eSuccess)
+		{
+			cout<<"failed to open 29.tm"<<"\n";
+			break;
+		}
+        LongFilePositionType fileSize = tmFileStream.GetFileSize();
+        cout << "file Size " << fileSize << endl;
+        Byte *test_ = new Byte[fileSize + 16];
+        tmFileStream.Read(test_, fileSize);
+        PDFAttachment *aAttachment = new PDFAttachment(test_, fileSize);
         status = attachmentWriter.AttachToAllPage(aAttachment);
         if (status != eSuccess)
         {
@@ -52,13 +64,13 @@ int main(int argc, char *argv[])
             break;
         }
 
-        status = pdfWriter.WritePageAndRelease(pdfPage);
-        if (status != eSuccess)
-        {
-            cout << "WritePageAndRelease fail\n"
-                 << endl;
-            break;
-        }
+        // status = pdfWriter.WritePageAndRelease(pdfPage);
+        // if (status != eSuccess)
+        // {
+        //     cout << "WritePageAndRelease fail\n"
+        //          << endl;
+        //     break;
+        // }
 
         status = pdfWriter.EndPDF();
     } while (false);
