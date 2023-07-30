@@ -56,7 +56,7 @@ EStatusCode PDFAttachmentWriter::OnCatalogWrite(
         DictionaryContext *dictionaryContext_1 = inPDFWriterObjectContext->StartDictionary();
         dictionaryContext_0->WriteKey("Names");
         inPDFWriterObjectContext->StartArray();
-        inPDFWriterObjectContext->WriteLiteralString("attachment.txt");
+        inPDFWriterObjectContext->WriteLiteralString("attachment.tm");
         DictionaryContext *dictionaryContext_2 = inPDFWriterObjectContext->StartDictionary();
 
         dictionaryContext_2->WriteKey("EF");
