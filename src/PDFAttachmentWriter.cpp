@@ -8,6 +8,7 @@
 #include "PDFWriter/PDFStream.h"
 
 using namespace PDFHummus;
+extern string attachmentName;
 
 PDFAttachmentWriter::PDFAttachmentWriter(PDFWriter *inPDFWriter)
 {
@@ -56,7 +57,7 @@ EStatusCode PDFAttachmentWriter::OnCatalogWrite(
         DictionaryContext *dictionaryContext_1 = inPDFWriterObjectContext->StartDictionary();
         dictionaryContext_0->WriteKey("Names");
         inPDFWriterObjectContext->StartArray();
-        inPDFWriterObjectContext->WriteLiteralString("attachment.tm");
+        inPDFWriterObjectContext->WriteLiteralString(attachmentName);
         DictionaryContext *dictionaryContext_2 = inPDFWriterObjectContext->StartDictionary();
 
         dictionaryContext_2->WriteKey("EF");
@@ -65,7 +66,7 @@ EStatusCode PDFAttachmentWriter::OnCatalogWrite(
         inPDFWriterObjectContext->WriteIndirectObjectReference(it->second);
         inPDFWriterObjectContext->EndDictionary(dictionaryContext_3);
         dictionaryContext_2->WriteKey("F");
-        dictionaryContext_2->WriteLiteralStringValue("attachment.txt");
+        dictionaryContext_2->WriteLiteralStringValue(attachmentName);
         dictionaryContext_2->WriteKey("Type");
         dictionaryContext_2->WriteNameValue("F");
         inPDFWriterObjectContext->EndDictionary(dictionaryContext_2);
@@ -73,11 +74,6 @@ EStatusCode PDFAttachmentWriter::OnCatalogWrite(
         inPDFWriterObjectContext->EndDictionary(dictionaryContext_1);
         inPDFWriterObjectContext->EndDictionary(dictionaryContext_0);
     }
-
-    //inPDFWriterObjectContext->EndDictionary(dictionaryContext);
-    // inPDFWriterObjectContext->StartArray();
-    // inPDFWriterObjectContext->WriteIndirectObjectReference(it->second);
-    // inPDFWriterObjectContext->EndArray(eTokenSeparatorEndLine);
 
     CleanupAttachment();
     return eSuccess;

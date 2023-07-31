@@ -1,10 +1,9 @@
 // standard library includes
 #include <iostream>
 #include <string>
+#include <getopt.h>
 using namespace std;
-// end standard library includes
 
-// pdfwriter library includes
 #include "PDFWriter/PDFWriter.h"
 #include "PDFWriter/PDFPage.h"
 #include "PDFWriter/PageContentContext.h"
@@ -17,16 +16,45 @@ using namespace std;
 
 using namespace PDFHummus;
 
+string tmPath = "29.tm";
+string pdfPath = "src.pdf";
+string outPdfPath = "OutputPdf.pdf";
+string attachmentName = "sourse.tm";
 
 int main(int argc, char *argv[])
 {
+    int c = 0; 
+    while(EOF != (c = getopt(argc,argv,"t:p:o:")))
+    {
+        switch(c)
+        {
+            case 't':
+                cout << "tmPath " << optarg << endl;
+                tmPath = optarg;
+                break;
+            case 'p':
+                cout << "pdfPath " << optarg << endl;
+                pdfPath = optarg;
+                break;
+            case 'o':
+                cout << "outPdfPath " << optarg << endl;
+                outPdfPath = optarg;
+                break;
+            case 'a':
+                cout << "attachmentName " << optarg << endl;
+                attachmentName = optarg;
+                break;
+            default:
+                cout << "bad arg" << endl;
+                exit(0);
+                break;
+        }    
+    }
     PDFWriter pdfWriter;
     EStatusCode status;
-
     do
     {
-        // status = pdfWriter.StartPDF(scBasePath + "MakingComments.pdf", ePDFVersion16);
-        status = pdfWriter.ModifyPDF("26_2_2pages.pdf", ePDFVersion16, "OutputPdf.pdf");
+        status = pdfWriter.ModifyPDF(pdfPath, ePDFVersion16, outPdfPath);
         if (status != eSuccess)
         {
             cout << "start fail\n"
@@ -34,18 +62,11 @@ int main(int argc, char *argv[])
             break;
         }
 
-        // // Create a new page
-        // PDFPage *pdfPage = new PDFPage();
-        // pdfPage->SetMediaBox(PDFRectangle(0, 0, 595, 842));
-
-        // // Create a content context for the page
-        // PageContentContext *pageContentContext = pdfWriter.StartPageContentContext(pdfPage);
-
         PDFAttachmentWriter attachmentWriter(&pdfWriter);
 
         InputFileStream tmFileStream;
 
-		status = tmFileStream.Open("29.tm");
+		status = tmFileStream.Open(tmPath);
 		if(status != PDFHummus::eSuccess)
 		{
 			cout<<"failed to open 29.tm"<<"\n";
@@ -64,15 +85,8 @@ int main(int argc, char *argv[])
             break;
         }
 
-        // status = pdfWriter.WritePageAndRelease(pdfPage);
-        // if (status != eSuccess)
-        // {
-        //     cout << "WritePageAndRelease fail\n"
-        //          << endl;
-        //     break;
-        // }
-
         status = pdfWriter.EndPDF();
+        delete test_;
     } while (false);
 
     if (eSuccess == status)
