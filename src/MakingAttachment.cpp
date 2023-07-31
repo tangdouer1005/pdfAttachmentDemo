@@ -16,13 +16,16 @@ using namespace std;
 
 using namespace PDFHummus;
 
-string tmPath = "29.tm";
-string pdfPath = "src.pdf";
-string outPdfPath = "OutputPdf.pdf";
+string tmPath = "/29.tm";
+string pdfPath = "/src.pdf";
+string outPdfPath = "/OutputPdf.pdf";
 string attachmentName = "sourse.tm";
 
 int main(int argc, char *argv[])
 {
+    tmPath = PROJECTDIR +tmPath ;
+    pdfPath = PROJECTDIR +pdfPath ;
+    outPdfPath = PROJECTDIR +outPdfPath ;
     int c = 0; 
     while(EOF != (c = getopt(argc,argv,"t:p:o:")))
     {
@@ -30,15 +33,18 @@ int main(int argc, char *argv[])
         {
             case 't':
                 cout << "tmPath " << optarg << endl;
-                tmPath = optarg;
+                tmPath = PROJECTDIR;
+                tmPath += optarg;
                 break;
             case 'p':
                 cout << "pdfPath " << optarg << endl;
-                pdfPath = optarg;
+                pdfPath = PROJECTDIR;
+                pdfPath += optarg;
                 break;
             case 'o':
                 cout << "outPdfPath " << optarg << endl;
-                outPdfPath = optarg;
+                outPdfPath = PROJECTDIR;
+                outPdfPath += optarg;
                 break;
             case 'a':
                 cout << "attachmentName " << optarg << endl;
@@ -55,6 +61,7 @@ int main(int argc, char *argv[])
     do
     {
         status = pdfWriter.ModifyPDF(pdfPath, ePDFVersion16, outPdfPath);
+        cout << pdfPath << endl;
         if (status != eSuccess)
         {
             cout << "start fail\n"
