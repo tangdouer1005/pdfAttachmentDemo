@@ -10,7 +10,8 @@
 #include <cstring>
 
 using namespace IOBasicTypes;
-using namespace std;
+
+#include "string.hpp"
 
 class PDFAttachment
 {

@@ -23,7 +23,7 @@ void PDFAttachmentWriter::ListenOnCatalogWrite()
 
 PDFAttachmentWriter::~PDFAttachmentWriter(void)
 {
-    if (mAttachment.size() != 0)
+    if (N(mAttachment) != 0)
         TRACE_LOG("PDFAttachmentWriter::~PDFAttachmentWriter, Exception. Has comments that were not associated with a page");
 
     CleanupAttachment();
@@ -37,7 +37,7 @@ EStatusCode PDFAttachmentWriter::OnCatalogWrite(
 {
     // write the comments as the page array of annotations
 
-    if (mAttachment.size() == 0)
+    if (N(mAttachment) == 0)
         return eSuccess;
 
     // if (inCatalogDictionaryContext->WriteKey("Names") != eSuccess)
@@ -49,24 +49,49 @@ EStatusCode PDFAttachmentWriter::OnCatalogWrite(
 
     //DictionaryContext *dictionaryContext = inPDFWriterObjectContext->StartDictionary();
     inCatalogDictionaryContext->WriteKey("Names");
-    PDFAttachmentToObjectIDTypeMap::iterator it = mAttachment.begin();
-    for (; it != mAttachment.end(); ++it)
-    {
+    // PDFAttachmentToObjectIDTypeMap::iterator it = mAttachment.begin();
+    // for (; it != mAttachment.end(); ++it)
+    // {
+    //     DictionaryContext *dictionaryContext_0 = inPDFWriterObjectContext->StartDictionary();
+    //     dictionaryContext_0->WriteKey("EmbeddedFiles");
+    //     DictionaryContext *dictionaryContext_1 = inPDFWriterObjectContext->StartDictionary();
+    //     dictionaryContext_0->WriteKey("Names");
+    //     inPDFWriterObjectContext->StartArray();
+    //     inPDFWriterObjectContext->WriteLiteralString(attachmentName);
+    //     DictionaryContext *dictionaryContext_2 = inPDFWriterObjectContext->StartDictionary();
+
+    //     dictionaryContext_2->WriteKey("EF");
+    //     DictionaryContext *dictionaryContext_3 = inPDFWriterObjectContext->StartDictionary();
+    //     dictionaryContext_3->WriteKey("F");
+    //     inPDFWriterObjectContext->WriteIndirectObjectReference(it->second);
+    //     inPDFWriterObjectContext->EndDictionary(dictionaryContext_3);
+    //     dictionaryContext_2->WriteKey("F");
+    //     dictionaryContext_2->WriteLiteralStringValue(attachmentName);
+    //     dictionaryContext_2->WriteKey("Type");
+    //     dictionaryContext_2->WriteNameValue("F");
+    //     inPDFWriterObjectContext->EndDictionary(dictionaryContext_2);
+    //     inPDFWriterObjectContext->EndArray();
+    //     inPDFWriterObjectContext->EndDictionary(dictionaryContext_1);
+    //     inPDFWriterObjectContext->EndDictionary(dictionaryContext_0);
+    // }
+
+    iterator<PDFAttachment *> it= iterate (mAttachment);
+    while (it->busy ()) {
+
         DictionaryContext *dictionaryContext_0 = inPDFWriterObjectContext->StartDictionary();
         dictionaryContext_0->WriteKey("EmbeddedFiles");
         DictionaryContext *dictionaryContext_1 = inPDFWriterObjectContext->StartDictionary();
         dictionaryContext_0->WriteKey("Names");
         inPDFWriterObjectContext->StartArray();
-        inPDFWriterObjectContext->WriteLiteralString(attachmentName);
+        inPDFWriterObjectContext->WriteLiteralString(as_charp(attachmentName));
         DictionaryContext *dictionaryContext_2 = inPDFWriterObjectContext->StartDictionary();
-
         dictionaryContext_2->WriteKey("EF");
         DictionaryContext *dictionaryContext_3 = inPDFWriterObjectContext->StartDictionary();
         dictionaryContext_3->WriteKey("F");
-        inPDFWriterObjectContext->WriteIndirectObjectReference(it->second);
+        inPDFWriterObjectContext->WriteIndirectObjectReference(mAttachment[it->next()]);
         inPDFWriterObjectContext->EndDictionary(dictionaryContext_3);
         dictionaryContext_2->WriteKey("F");
-        dictionaryContext_2->WriteLiteralStringValue(attachmentName);
+        dictionaryContext_2->WriteLiteralStringValue(as_charp(attachmentName));
         dictionaryContext_2->WriteKey("Type");
         dictionaryContext_2->WriteNameValue("F");
         inPDFWriterObjectContext->EndDictionary(dictionaryContext_2);
@@ -74,17 +99,22 @@ EStatusCode PDFAttachmentWriter::OnCatalogWrite(
         inPDFWriterObjectContext->EndDictionary(dictionaryContext_1);
         inPDFWriterObjectContext->EndDictionary(dictionaryContext_0);
     }
-
     CleanupAttachment();
     return eSuccess;
 }
 
 void PDFAttachmentWriter::CleanupAttachment()
 {
-    PDFAttachmentToObjectIDTypeMap::iterator it = mAttachment.begin();
-    for (; it != mAttachment.end(); ++it)
-        delete it->first;
-    mAttachment.clear();
+    
+    iterator<PDFAttachment *> it= iterate (mAttachment);
+    while (it->busy ())
+    {
+        delete it->next();
+    }
+    // PDFAttachmentToObjectIDTypeMap::iterator it = mAttachment.begin();
+    // for (; it != mAttachment.end(); ++it)
+    //     delete it->first;
+    //mAttachment.clear();
 }
 
 EStatusCode PDFAttachmentWriter::AttachToAllPage(PDFAttachment *inAttachment)
@@ -97,11 +127,25 @@ EStatusCodeAndObjectIDType PDFAttachmentWriter::WriteAttachment(PDFAttachment *i
     EStatusCodeAndObjectIDType result;
 
     // if already written, return
-    PDFAttachmentToObjectIDTypeMap::iterator it = mAttachment.find(inAttachment);
-    if (it != mAttachment.end())
+
+    // PDFAttachmentToObjectIDTypeMap::iterator it = mAttachment.find(inAttachment);
+    // if (it != mAttachment.end())
+    // {
+    //     result.first = eSuccess;
+    //     result.second = it->second;
+    //     return result;
+    // }
+    // iterator<PDFAttachment *> it= iterate (mAttachment);
+    // while (it->busy ())
+    // {
+    //     if(it->remains() == inAttachment)
+    //         break;
+    //     it -> next();
+    // }
+    if(mAttachment->contains(inAttachment))
     {
         result.first = eSuccess;
-        result.second = it->second;
+        result.second = mAttachment[inAttachment];
         return result;
     }
 
@@ -119,8 +163,8 @@ EStatusCodeAndObjectIDType PDFAttachmentWriter::WriteAttachment(PDFAttachment *i
         mwriter->Write(inAttachment->FileContent, inAttachment->Lenth);
         objectsContext.EndPDFStream(pdfStream);
 
-        mAttachment.insert(PDFAttachmentToObjectIDTypeMap::value_type(inAttachment, result.second));
-
+        //mAttachment.insert(PDFAttachmentToObjectIDTypeMap::value_type(inAttachment, result.second));
+        mAttachment(inAttachment) = result.second;
         result.first = eSuccess;
     } while (false);
 

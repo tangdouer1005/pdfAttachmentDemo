@@ -1,8 +1,13 @@
 // standard library includes
 #include <iostream>
 #include <string>
+
+// lolly
+
+#include "string.hpp"
+
+
 #include <getopt.h>
-using namespace std;
 
 #include "PDFWriter/PDFWriter.h"
 #include "PDFWriter/PDFPage.h"
@@ -16,42 +21,39 @@ using namespace std;
 
 using namespace PDFHummus;
 
-string tmPath = "/29.tm";
-string pdfPath = "/src.pdf";
-string outPdfPath = "/OutputPdf.pdf";
+string tmPath;
+string pdfPath;
+string outPdfPath;
 string attachmentName = "sourse.tm";
 
 int main(int argc, char *argv[])
 {
-    tmPath = PROJECTDIR +tmPath ;
-    pdfPath = PROJECTDIR +pdfPath ;
-    outPdfPath = PROJECTDIR +outPdfPath ;
+    tmPath = PROJECTDIR *string("/29.tm");
+    pdfPath = PROJECTDIR * string("/src.pdf");
+    outPdfPath = PROJECTDIR * string("/OutputPdf.pdf");
     int c = 0; 
     while(EOF != (c = getopt(argc,argv,"t:p:o:")))
     {
         switch(c)
         {
             case 't':
-                cout << "tmPath " << optarg << endl;
-                tmPath = PROJECTDIR;
-                tmPath += optarg;
+                std::cout << "tmPath " << optarg << std::endl;
+                tmPath = PROJECTDIR * string(optarg);
                 break;
             case 'p':
-                cout << "pdfPath " << optarg << endl;
-                pdfPath = PROJECTDIR;
-                pdfPath += optarg;
+                std::cout << "pdfPath " << optarg << std::endl;
+                pdfPath = PROJECTDIR* string(optarg);
                 break;
             case 'o':
-                cout << "outPdfPath " << optarg << endl;
-                outPdfPath = PROJECTDIR;
-                outPdfPath += optarg;
+                std::cout << "outPdfPath " << optarg << std::endl;
+                outPdfPath = PROJECTDIR* string(optarg);
                 break;
             case 'a':
-                cout << "attachmentName " << optarg << endl;
+                std::cout << "attachmentName " << optarg << std::endl;
                 attachmentName = optarg;
                 break;
             default:
-                cout << "bad arg" << endl;
+                std::cout << "bad arg" << std::endl;
                 exit(0);
                 break;
         }    
@@ -60,12 +62,12 @@ int main(int argc, char *argv[])
     EStatusCode status;
     do
     {
-        status = pdfWriter.ModifyPDF(pdfPath, ePDFVersion16, outPdfPath);
-        cout << pdfPath << endl;
+        status = pdfWriter.ModifyPDF(as_charp(pdfPath), ePDFVersion16, as_charp(outPdfPath));
+        std::cout << as_charp(pdfPath) << std::endl;
         if (status != eSuccess)
         {
-            cout << "start fail\n"
-                 << endl;
+            std::cout << "start fail\n"
+                 << std::endl;
             break;
         }
 
@@ -73,22 +75,22 @@ int main(int argc, char *argv[])
 
         InputFileStream tmFileStream;
 
-		status = tmFileStream.Open(tmPath);
+		status = tmFileStream.Open(as_charp(tmPath));
 		if(status != PDFHummus::eSuccess)
 		{
-			cout<<"failed to open 29.tm"<<"\n";
+			std::cout<<"failed to open 29.tm"<<"\n";
 			break;
 		}
         LongFilePositionType fileSize = tmFileStream.GetFileSize();
-        cout << "file Size " << fileSize << endl;
+        std::cout << "file Size " << fileSize << std::endl;
         Byte *test_ = new Byte[fileSize + 16];
         tmFileStream.Read(test_, fileSize);
         PDFAttachment *aAttachment = new PDFAttachment(test_, fileSize);
         status = attachmentWriter.AttachToAllPage(aAttachment);
         if (status != eSuccess)
         {
-            cout << "Attach fail\n"
-                 << endl;
+            std::cout << "Attach fail\n"
+                 << std::endl;
             break;
         }
 
@@ -97,9 +99,9 @@ int main(int argc, char *argv[])
     } while (false);
 
     if (eSuccess == status)
-        cout << "Succeeded in creating PDF file\n";
+        std::cout << "Succeeded in creating PDF file\n";
     else
-        cout << "Failed in creating PDF file\n";
+        std::cout << "Failed in creating PDF file\n";
 
     return 0;
 }

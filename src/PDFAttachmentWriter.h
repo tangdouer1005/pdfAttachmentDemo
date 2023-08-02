@@ -3,7 +3,7 @@
 #include "PDFAttachment.h"
 #include "PDFWriter/ObjectsBasicTypes.h"
 #include "PDFWriter/DocumentContextExtenderAdapter.h"
-
+#include "PDFWriter/DocumentContext.h"
 #include "PDFWriter/OutputBufferedStream.h"
 #include "PDFWriter/OutputFileStream.h"
 
@@ -11,12 +11,14 @@
 #include <utility>
 
 using namespace IOBasicTypes;
-using namespace std;
-
+#include "iterator.hpp"
+#include "string.hpp"
+#include "hashmap.hpp"
+//#include "ntuple.hpp"
 class PDFWriter;
 
-typedef map<PDFAttachment *, ObjectIDType> PDFAttachmentToObjectIDTypeMap;
-typedef pair<EStatusCode, ObjectIDType> EStatusCodeAndObjectIDType;
+typedef hashmap<PDFAttachment *, ObjectIDType> PDFAttachmentToObjectIDTypeMap;
+//typedef pair<EStatusCode, ObjectIDType> EStatusCodeAndObjectIDType;
 
 class PDFAttachmentWriter : public DocumentContextExtenderAdapter
 {
