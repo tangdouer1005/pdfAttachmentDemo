@@ -141,7 +141,7 @@ void PDFAttachmentWriter::ListenOnCatalogWrite()
 PDFAttachmentWriter::~PDFAttachmentWriter(void)
 {
     if (N(mAttachment) != 0)
-        TRACE_LOG("PDFAttachmentWriter::~PDFAttachmentWriter, Exception. Has comments that were not associated with a page");
+        TRACE_LOG("PDFAttachmentWriter::~PDFAttachmentWriter, Exception. Has attachement that were not associated with pages");
     CleanupAttachment();
 }
 
