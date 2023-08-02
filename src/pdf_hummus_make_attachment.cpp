@@ -17,6 +17,7 @@ using namespace IOBasicTypes;
 #include "iterator.hpp"
 #include "string.hpp"
 #include "hashmap.hpp"
+#include "tm_ostream.hpp"
 
 #include "pdf_hummus_make_attachment.hpp"
 
@@ -24,17 +25,17 @@ class PDFAttachment
 {
 public:
     PDFAttachment(void);
-    PDFAttachment(Byte inByte[], size_t inLenth);
+    PDFAttachment(Byte inByte[], size_t inLenth, string inName);
     ~PDFAttachment(void);
 
     Byte *FileContent;
     size_t Lenth;
+    string Name;
 };
 
 class PDFWriter;
 
 typedef hashmap<PDFAttachment *, ObjectIDType> PDFAttachmentToObjectIDTypeMap;
-//typedef pair<EStatusCode, ObjectIDType> EStatusCodeAndObjectIDType;
 
 class PDFAttachmentWriter : public DocumentContextExtenderAdapter
 {
@@ -57,80 +58,67 @@ private:
     EStatusCodeAndObjectIDType WriteAttachment(PDFAttachment *inAttachment);
     void CleanupAttachment();
 };
-string attachment_name;
 void pdf_hummus_make_attachment (string pdf_path, string attachment_path, string out_path)
 {
-    int i, last_slash_index = 0;
-    for(i = 0; i < N(attachment_path) ;i ++)
-    {
-        if(attachment_path[i] == '/')
-            last_slash_index = i;
-    }
-    attachment_name = attachment_path(last_slash_index + 1, N(attachment_path));
-    //std::cout << last_slash_index << " " << N(attachment_path) << " " << as_charp(attachment_name) << std::endl;
-    //return;
     PDFWriter pdfWriter;
     EStatusCode status;
     do
     {
         status = pdfWriter.ModifyPDF(as_charp(pdf_path), ePDFVersion16, as_charp(out_path));
-        std::cout << as_charp(pdf_path)
-                 << std::endl;
-        std::cout << as_charp(out_path)
-                 << std::endl;
         if (status != eSuccess)
         {
-            std::cout << "start fail"
-                 << std::endl;
+            cout << "start fail\n";
             break;
         }
-        //return;
         PDFAttachmentWriter attachmentWriter(&pdfWriter);
 
         InputFileStream tm_file_stream;
-
 		status = tm_file_stream.Open(as_charp(attachment_path));
 		if(status != PDFHummus::eSuccess)
 		{
-			std::cout<<"failed to open tm"<<std::endl;
+			cout<<"failed to open tm\n";
 			break;
 		}
-        LongFilePositionType fileSize = tm_file_stream.GetFileSize();
-        std::cout << "file Size " << fileSize << std::endl;
+        LongFilePositionType file_size = tm_file_stream.GetFileSize();
+        Byte *file_content = new Byte[file_size + 16];
+        tm_file_stream.Read(file_content, file_size);
 
-        //new 要替换成tm_new
-        Byte *test_ = new Byte[fileSize + 16];
-        tm_file_stream.Read(test_, fileSize);
-        PDFAttachment *aAttachment = new PDFAttachment(test_, fileSize);
+
+        int i, last_slash_index = 0;
+        for(i = 0; i < N(attachment_path) ;i ++)
+        {
+            if(attachment_path[i] == '/')
+                last_slash_index = i;
+        }
+        string attachment_name = attachment_path(last_slash_index + 1, N(attachment_path));
+        
+        PDFAttachment *aAttachment = new PDFAttachment(file_content, file_size, attachment_name);
+
         status = attachmentWriter.AttachToAllPage(aAttachment);
         if (status != eSuccess)
         {
-            std::cout << "Attach fail\n"
-                 << std::endl;
+            cout << "Attach fail\n";
             break;
         }
 
         status = pdfWriter.EndPDF();
-        delete test_;
     } while (false);
 
     if (eSuccess == status)
-        std::cout << "Succeeded in creating PDF file\n";
+        cout << "Succeeded in creating PDF file\n";
     else
-        std::cout << "Failed in creating PDF file\n";
-
-    //return 0;
+        cout << "Failed in creating PDF file\n";
 }
 PDFAttachment::PDFAttachment(void)
 {
     FileContent = NULL;
     Lenth = 0;
 }
-PDFAttachment::PDFAttachment(Byte inByte[], size_t inLenth)
+PDFAttachment::PDFAttachment(Byte inByte[], size_t inLenth, string inName)
 {
-    FileContent = new Byte[inLenth];
-    memcpy(FileContent, inByte, inLenth);
+    FileContent = inByte;
     Lenth = inLenth;
+    Name = inName;
 }
 
 PDFAttachment::~PDFAttachment(void)
@@ -138,8 +126,6 @@ PDFAttachment::~PDFAttachment(void)
     if (FileContent)
         delete FileContent;
 }
-
-
 
 PDFAttachmentWriter::PDFAttachmentWriter(PDFWriter *inPDFWriter)
 {
@@ -156,7 +142,6 @@ PDFAttachmentWriter::~PDFAttachmentWriter(void)
 {
     if (N(mAttachment) != 0)
         TRACE_LOG("PDFAttachmentWriter::~PDFAttachmentWriter, Exception. Has comments that were not associated with a page");
-
     CleanupAttachment();
 }
 
@@ -173,21 +158,21 @@ EStatusCode PDFAttachmentWriter::OnCatalogWrite(
 
     iterator<PDFAttachment *> it= iterate (mAttachment);
     while (it->busy ()) {
-
+        PDFAttachment *cur_attachment = it->next();
         DictionaryContext *dictionaryContext_0 = inPDFWriterObjectContext->StartDictionary();
         dictionaryContext_0->WriteKey("EmbeddedFiles");
         DictionaryContext *dictionaryContext_1 = inPDFWriterObjectContext->StartDictionary();
         dictionaryContext_0->WriteKey("Names");
         inPDFWriterObjectContext->StartArray();
-        inPDFWriterObjectContext->WriteLiteralString(as_charp(attachment_name));
+        inPDFWriterObjectContext->WriteLiteralString(as_charp(cur_attachment -> Name));
         DictionaryContext *dictionaryContext_2 = inPDFWriterObjectContext->StartDictionary();
         dictionaryContext_2->WriteKey("EF");
         DictionaryContext *dictionaryContext_3 = inPDFWriterObjectContext->StartDictionary();
         dictionaryContext_3->WriteKey("F");
-        inPDFWriterObjectContext->WriteIndirectObjectReference(mAttachment[it->next()]);
+        inPDFWriterObjectContext->WriteIndirectObjectReference(mAttachment[cur_attachment]);
         inPDFWriterObjectContext->EndDictionary(dictionaryContext_3);
         dictionaryContext_2->WriteKey("F");
-        dictionaryContext_2->WriteLiteralStringValue(as_charp(attachment_name));
+        dictionaryContext_2->WriteLiteralStringValue(as_charp(cur_attachment -> Name));
         dictionaryContext_2->WriteKey("Type");
         dictionaryContext_2->WriteNameValue("F");
         inPDFWriterObjectContext->EndDictionary(dictionaryContext_2);
