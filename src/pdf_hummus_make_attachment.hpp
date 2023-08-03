@@ -12,8 +12,27 @@
 #ifndef PDF_HUMMUS_MAKE_ATTACHMENT_H
 #define PDF_HUMMUS_MAKE_ATTACHMENT_H
 
+#include "PDFWriter/DictionaryContext.h"
+#include "PDFWriter/ObjectsContext.h"
+#include "PDFWriter/PDFRectangle.h"
+#include "PDFWriter/PDFStream.h"
+#include "PDFWriter/PDFWriter.h"
+#include "PDFWriter/SafeBufferMacrosDefs.h"
+#include "PDFWriter/Trace.h"
+
+#include "PDFWriter/InputFileStream.h"
+#include "PDFWriter/OutputBufferedStream.h"
+#include "PDFWriter/OutputFileStream.h"
+using namespace PDFHummus;
+#include <utility>
+
+using namespace IOBasicTypes;
 #include "hashmap.hpp"
-#include <iostream>
-void pdf_hummus_make_attachment (string pdf_path, string attachment_path, string out_path);
+#include "iterator.hpp"
+#include "string.hpp"
+#include "tm_ostream.hpp"
+#include "list.hpp"
+
+EStatusCode  pdf_hummus_make_attachment (string pdf_path, list<string> attachment_path, string out_path);
 
 #endif // ifdef PDF_HUMMUS_MAKE_ATTACHMENT_H
