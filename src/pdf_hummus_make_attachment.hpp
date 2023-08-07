@@ -33,6 +33,12 @@ using namespace IOBasicTypes;
 #include "tm_ostream.hpp"
 #include "list.hpp"
 
-EStatusCode  pdf_hummus_make_attachment (string pdf_path, list<string> attachment_path, string out_path);
+
+bool  pdf_hummus_make_attachment (string pdf_path, string attachment_path, string out_path)
+{
+    return pdf_hummus_make_attachments(pdf, list<string>(attachment_path), out_path);
+}
+
+bool  pdf_hummus_make_attachments (string pdf_path, list<string> attachment_path, string out_path);
 
 #endif // ifdef PDF_HUMMUS_MAKE_ATTACHMENT_H

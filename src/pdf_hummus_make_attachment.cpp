@@ -37,7 +37,7 @@ private:
   EStatusCodeAndObjectIDType WriteAttachment(PDFAttachment *inAttachment);
   void CleanupAttachment();
 };
-EStatusCode pdf_hummus_make_attachment(string pdf_path,
+bool pdf_hummus_make_attachments(string pdf_path,
                                        list<string> attachment_paths,
                                        string out_path) {
   PDFWriter pdfWriter;
@@ -93,10 +93,15 @@ EStatusCode pdf_hummus_make_attachment(string pdf_path,
   } while (false);
 
   if (eSuccess == status)
+  {
     cout << "Succeeded in creating PDF file\n";
+    return true;
+  }
   else
+  {
     cout << "Failed in creating PDF file\n";
-  return status;
+    return false;
+  }
 }
 PDFAttachment::PDFAttachment(void) {
   file_content = NULL;
